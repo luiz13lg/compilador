@@ -21,13 +21,13 @@ public class AnalisadorSintatico {
     private static Lexico lex;
     
     public static ArrayList<Token> analisadorSintatico(String codigoFonte, JTextPane text) throws IOException{
-        lex = new Lexico (new StringReader(codigoFonte));
+        lex = lex = new Lexico (new StringReader(codigoFonte));
         tokens = new ArrayList<Token>();
         erroSintatico = "";
         analisadorLexico();
         
         if(programa()){
-            text.setText("O código está correto sintaticamente");
+            text.setText("O código está correto sintaticaente");
             text.setBackground(java.awt.Color.green);
         }
         else
@@ -362,8 +362,10 @@ public class AnalisadorSintatico {
                     {
                         if(lexema().equals("while"))
                             return comandoRepetitivo();
-                        else
+                        else{
+                            erroSintatico = "Esperado um comando na linha " + linha() + " coluna " + coluna();
                             return false;
+                        }
                     }
                 }
             }
@@ -523,9 +525,12 @@ public class AnalisadorSintatico {
         Token novo = lex.token();
         if(novo == null)
         //o comando abaixo adiciona um token "Fim" para indicar que acabou o código
-        //são calculadas as linha e a coluna do final do código a partir da posição do ultimo token
+        //são calculadas as linha e a coluna do final do código a partir da posição do útlimo token
         {
-            tokens.add(new Token ("FIM", "", linha(), coluna() + lexema().length()));
+            if(tokens.size() > 0)
+                tokens.add(new Token ("FIM", "", linha() - 1, coluna() + lexema().length() - 1));
+            else
+                tokens.add(new Token ("FIM", "", 0, 0));
         }
             
         else{
@@ -548,11 +553,17 @@ public class AnalisadorSintatico {
     }
     
     public static int linha(){
-        return tokens.get(tokens.size()-1).getLinha() + 1;
+        if(tokens.size() > 0)
+            return tokens.get(tokens.size()-1).getLinha() + 1;
+        else
+            return 1;
     }
     
     public static int coluna (){
-        return tokens.get(tokens.size()-1).getColuna() + 1;
+        if(tokens.size() > 0)
+            return tokens.get(tokens.size()-1).getColuna() + 1;
+        else
+            return 1;
     }
     
     
